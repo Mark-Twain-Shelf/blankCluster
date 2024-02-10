@@ -1,0 +1,29 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: blank
+networking:
+  ipFamily: dual
+  apiServerAddress: 127.0.0.1
+  podSubnet: fd00:10:244::/56,10.244.0.0/16
+  serviceSubnet: fd00:10:96::/112,10.96.0.0/16
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+    endpoint = ["https://local-registry:5000"]
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |-
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=false"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+    listenAddress: 127.0.0.1
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+    listenAddress: 127.0.0.1
